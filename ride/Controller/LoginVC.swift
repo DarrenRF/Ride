@@ -38,7 +38,7 @@ class LoginVC: UIViewController, UITextFieldDelegate, Alertable {
     
     @IBAction func authBtnWasPressed(_ sender: Any) {
         if emailField.text != nil && passwordField != nil {
-            authBtn.animateButton(shouldLoad: true, withMessage: nil)
+            // authBtn.animateButton(shouldLoad: true, withMessage: nil)
             self.view.endEditing(true)
             
             if let email = emailField.text, let password = passwordField.text {
