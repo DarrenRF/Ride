@@ -104,7 +104,7 @@ class HomeVC: UIViewController, Alertable {
         
         UpdateService.instance.observeTrips { (tripDict) in
             if let tripDict = tripDict {
-
+                
                 let pickupCoordinateArray = tripDict[USER_PICKUP_COORDINATE] as! NSArray
 
                 let tripKey = tripDict[USER_PASSENGER_KEY] as! String
@@ -147,6 +147,8 @@ class HomeVC: UIViewController, Alertable {
                         self.buttonsForDriver(areHidden: true)
                         self.destinationTextField.isUserInteractionEnabled = false
                         self.destinationTextField.text = "Enable pickup mode to start"
+                    } else if status == false {
+                        self.destinationTextField.text = ""
                     }
                 })
                 
@@ -253,10 +255,9 @@ class HomeVC: UIViewController, Alertable {
             if let driverSnapshot = snapshot.children.allObjects as? [DataSnapshot] {
                 for driver in driverSnapshot {
                     if driver.hasChild(USER_IS_DRIVER) {
-
+                        
                         if driver.hasChild(COORDINATE) {
                             if driver.childSnapshot(forPath: ACCOUNT_PICKUP_MODE_ENABLED).value as? Bool == true {
-                                self.destinationTextField.text = "Waiting for pickup request..."
                                 if let driverDict = driver.value as? Dictionary<String, AnyObject> {
 
                                     let coordinateArray = driverDict[COORDINATE] as! NSArray
@@ -286,7 +287,6 @@ class HomeVC: UIViewController, Alertable {
                                 }
                                 
                             } else {
-                                self.destinationTextField.text = "Enable pickup mode to start"
                                 for annotation in self.mapView.annotations {
                                     if annotation.isKind(of: DriverAnnotation.self) {
                                         if let annotation = annotation as? DriverAnnotation {
@@ -403,6 +403,8 @@ class HomeVC: UIViewController, Alertable {
             DataService.instance.driverIsOnTrip(driverKey: currentUserId!, handler: { (isOnTrip, driverKey, tripKey) in
                 if isOnTrip == true {
                     UpdateService.instance.cancelTrip(withPassengerKey: tripKey!, forDriverKey: driverKey!)
+                } else {
+                    self.buttonsForDriver(areHidden: true)
                 }
             })
             
@@ -458,13 +460,13 @@ class HomeVC: UIViewController, Alertable {
                     if isOnTrip == true {
                         DataService.instance.REF_TRIPS.child(tripKey!).observe(.value, with: { (tripSnapshot) in
                             let tripDict = tripSnapshot.value as? Dictionary<String, AnyObject>
-                            
-                            let pickupCoordinateArray = tripDict?[USER_PICKUP_COORDINATE] as! NSArray
+                            if (tripDict != nil) {
+                             let pickupCoordinateArray = tripDict?[USER_PICKUP_COORDINATE] as! NSArray
                             let pickupCoordinate = CLLocationCoordinate2D(latitude: pickupCoordinateArray[0] as! CLLocationDegrees, longitude: pickupCoordinateArray[1] as! CLLocationDegrees)
-                            
                             let pickupMapItem = MKMapItem(placemark: MKPlacemark(coordinate: pickupCoordinate))
                             pickupMapItem.name = MSG_PASSENGER_PICKUP
                             pickupMapItem.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey:MKLaunchOptionsDirectionsModeDriving])
+                            } 
                         })
                     }
                 })
@@ -592,6 +594,7 @@ extension HomeVC: MKMapViewDelegate {
                     DataService.instance.driverIsOnTrip(driverKey: self.currentUserId!, handler: { (isOnTrip, driverKey, tripKey) in
                         if isOnTrip == true {
                             self.zoom(toFitAnnotationsFromMapView: self.mapView, forActiveTripWithDriver: true, withKey: driverKey)
+                            self.destinationTextField.text = "On Trip"
                         } else {
                             self.centerMapOnUserLocation()
                         }
@@ -899,11 +902,10 @@ extension HomeVC: UITextFieldDelegate {
         
         
         if textField == destinationTextField {
-            
-            performSearch()
-            
-            shouldPresentLoadingView(true)
-
+            if self.destinationTextField.text != "" {
+                performSearch()
+                shouldPresentLoadingView(true)
+            }
             view.endEditing(true)
         }
 
