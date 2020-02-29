@@ -97,14 +97,18 @@ class LeftSidePanelVC: UIViewController {
             pickupModeLbl.text = "PICKUP MODE ENABLED"
             
             appDelegate.MenuContainerVC.toggleLeftPanel()
-            DataService.instance.REF_DRIVERS.child(currentUserId!).updateChildValues(["isPickupModeEnabled": true])
+            if ((currentUserId != nil)) {
+                DataService.instance.REF_DRIVERS.child(currentUserId!).updateChildValues(["isPickupModeEnabled": true])
+            }
             
-        }else {
+            
+        } else {
             pickupModeLbl.text = "PICKUP MODE DISABLED"
             
             appDelegate.MenuContainerVC.toggleLeftPanel()
-            
-            DataService.instance.REF_DRIVERS.child(currentUserId!).updateChildValues(["isPickupModeEnabled": false])
+            if ((currentUserId != nil)) {
+                DataService.instance.REF_DRIVERS.child(currentUserId!).updateChildValues(["isPickupModeEnabled": false])
+            }
         }
         
     }

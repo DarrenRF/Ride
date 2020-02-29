@@ -44,6 +44,7 @@ class LoginVC: UIViewController, UITextFieldDelegate, Alertable {
             if let email = emailField.text, let password = passwordField.text {
                 Auth.auth().signIn(withEmail: email, password: password, completion: { (user, error) in
                     if error == nil {
+                        
                         if let result = user {
                             if self.segmentedControl.selectedSegmentIndex == 0 {
                                 
@@ -51,28 +52,32 @@ class LoginVC: UIViewController, UITextFieldDelegate, Alertable {
                                 
                                 DataService.instance.createFirebaseDBUser(uid: result.user.uid, userData: userData, isDriver: false)
                                 
+                                print("Email user authenticated successfully with Firebase")
+                                self.dismiss(animated: true, completion: nil)
+                                
                             }else {
                                 let userData = ["provider": result.user.providerID, "userIsDriver": true, "isPickupModeEnabled": false, "driverIsOnTrip": false] as [String: Any]
                                 DataService.instance.createFirebaseDBUser(uid: result.user.uid, userData: userData, isDriver: true)
+                                
+                                print("Email user authenticated successfully with Firebase")
+                                self.dismiss(animated: true, completion: nil)
                             }
                         }
-
-                        print("Email user authenticated successfully with Firebase")
-                        self.dismiss(animated: true, completion: nil)
                         
                     } else {
-                        
-                        if let errorCode = AuthErrorCode(rawValue: error!._code){
-                            switch errorCode {
-                            case .wrongPassword:
-                                self.showAlert("Whoops! That was the wrong password!")
-                            default:
-                                self.showAlert("An unexpected error occurred. Please try again")
+                        if user != nil {
+                            if let errorCode = AuthErrorCode(rawValue: error!._code){
+                                switch errorCode {
+                                case .wrongPassword:
+                                    self.showAlert("Whoops! That was the wrong password!")
+                                default:
+                                    self.showAlert("An unexpected error occurred. Please try again")
+                                }
                             }
                         }
                         Auth.auth().createUser(withEmail: email, password: password, completion: { (user, error) in
                             if error != nil {
-        
+                                
                                 if let errorCode = AuthErrorCode(rawValue: error!._code){
                                     switch errorCode {
                                     case .invalidEmail:
@@ -88,15 +93,17 @@ class LoginVC: UIViewController, UITextFieldDelegate, Alertable {
                                         let userData = ["Provider": result.user.providerID] as [String: Any]
                                         DataService.instance.createFirebaseDBUser(uid: result.user.uid, userData: userData, isDriver: false)
                                         
-                                    }else {
+                                        print("Successfully created a new user with Firebase")
+                                        self.dismiss(animated: true, completion: nil)
+                                        
+                                    } else {
                                         let userData = ["provider": result.user.providerID, "userIsDriver": true, "isPickupModeEnabled": false, "driverIsOnTrip": false] as [String: Any]
                                         DataService.instance.createFirebaseDBUser(uid: result.user.uid, userData: userData, isDriver: true)
                                         
+                                        print("Successfully created a new user with Firebase")
+                                        self.dismiss(animated: true, completion: nil)
                                     }
                                 }
-
-                                print("Successfully created a new user with Firebase")
-                                self.dismiss(animated: true, completion: nil)
                             }
                         })
                         
