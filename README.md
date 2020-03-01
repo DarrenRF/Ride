@@ -1,5 +1,5 @@
 # Ride
 
 <p align="center">
-  <img src="https://giphy.com/embed/UqjYCreiG2VALKWXIh" width="480" height="270" frameBorder="0" class="giphy-embed" allowFullScreen />
+  <img src="https://media.giphy.com/media/UqjYCreiG2VALKWXIh/giphy.gif" />
 </p>
